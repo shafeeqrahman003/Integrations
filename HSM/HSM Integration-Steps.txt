@@ -1,0 +1,61 @@
+Deploy HSM cert(s) to application client server(s)
+
+* Place the certificate received from IIP here:
+    c:\Program Files\SafeNet\LunaClient\cert\server
+
+* Perform the following command to register the HSM cert to the client:
+
+>vtl addServer -n <HSM eth0> -c <HSM eth0>.pem
+
+You might need to surround the entire filespec (path and filename) within quotation marks if windows stumbles at the space between Program and Files.
+
+
+* Repeat for each HSM cert required upon that client
+
+Verify the setup
+
+* Run the command:
+./vtl verify
+
+Confirm that the expected partition(s) is there.
+
+* Repeat for each client
+
+HA group creation is done to maintain high availability. To create the HA group, navigate to the location "C:\Program Files\SafeNet\LunaClient" and run the below command.
+>hagroup createGroup -serialNumber <serial_number_of_hsm x_partition> -label <Prod-group-name>
+
+Once the group has been created add the other partition to the group.
+>haGroup addMember -serialNumber <serial_number_of_hsmy_partition> -group <Prod-group-name>
+
+Run the below command to synchronize.
+>haGroup synchronize -group <Prod-group-name>
+
+Run the below command to see the hagroup.
+>haGroup listGroups
+
+Run "vtl verify" and "vtl listSlots".
+
+Enable HAOnly - under luncm:> prompt, run "haGroup HAOnly -enable"  and "haGroup HAOnly -show" [This will hide the physical slots (partitions), and allow application to only see the HA slot]
+haGroup HAOnly -enable
+hagroup haonly -show
+
+Enable HA auto-recovery.
+This will allow the auto recovery of the synchronisation between the HSMs, if a HSM is powered off for a short period.
+
+For HA recovery attempts:
+
+The default retry interval is 60 seconds.
+The default number of retries is 0, which means that automatic recovery is disabled.
+The HA configuration section in the Chrystoki.conf/crystoki.ini file is created and populated when either the interval or the number of retries is specified in the LunaCM commands hagroup retry and hagroup interval. Eg: 500 is 500 tries to resync.
+
+hagroup recoverymode -mode activeEnhanced
+lunacm:>hagroup retry -count 500
+lunacm:>hagroup interval -interval 60
+
+
+Enable HA Logging
+lunacm:>hagroup halog -maxlength 500000
+
+lunacm:>hagroup halog -path <log-file_path>
+lunacm:>hagroup halog -enable
+lunacm:>hagroup halog -show
