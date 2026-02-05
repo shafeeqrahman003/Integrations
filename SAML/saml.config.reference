@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<SAMLConfiguration xmlns="urn:componentspace:SAML:2.0:configuration">
+    <ServiceProvider Name="PasswordVault" Description="PasswordVault Service Provider">
+        <LocalCertificates>
+            <Certificate SerialNumber="serialnumber" Use="Signature"/>
+            <Certificate SerialNumber="serialnumber" Use="Encryption"/>
+        </LocalCertificates>
+    </ServiceProvider>
+    <PartnerIdentityProviders>
+        <PartnerIdentityProvider Name="http://federation.barcapint.com/fed/idp" SingleSignOnServiceUrl="https://federation.client.acme.com/idp/SSO.saml2" SignAuthnRequest="true" ForceAuthn="true">
+            <PartnerCertificates>
+                <Certificate String="CertificateTXT" />
+            </PartnerCertificates>
+        </PartnerIdentityProvider>
+    </PartnerIdentityProviders>
+</SAMLConfiguration>
