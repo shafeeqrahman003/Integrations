@@ -1,0 +1,60 @@
+dbparm config
+
+* AllowNonStandardFWAddresses=[HSM-IP],Yes,1792:inbound/tcp,1792:outbound/tcp
+* PKCS11ProviderPath="full path to the cryptoki.dll 64-bit version"
+* ReconnectHSMOnErrorCodes=224
+
+
+Perform the following command in a cmd as administrator in order to encrypt the HSMPinCode in the dbparm.ini :
+* CAVaultManager.exe SecureSecretFiles /SecretType HSM /Secret <HSM partition_password>
+
+To list existing server key from HSM
+cmu list
+
+Prior to the Vault rekey, the following files/folders need to be backed up :
+* Vault database on the shared storage : S:\PrivateArk\Safes
+* The entropy file : S:\PrivateArk\Safes\entropy.rnd
+* Vault Installation folder : %Program Files%\PrivateArk\Server
+* The RADIUS secret file : %Program Files%\PrivateArk\Server\RadiusSecret.txt
+* Current Vault keys : E:\SOFTWARE\Operator
+* The database password : E:\SOFTWARE\Operator\VaultUser.pass
+* The emergency password : E:\SOFTWARE\Operator\VaultEmergency.pass
+* The PKI Vault private key : E:\SOFTWARE\Operator\Server.pvk
+* Ensure to have a recent CyberArk backup made with the PAReplicate
+
+Do not rekey while the CyberArk Vault Disaster Recovery or PrivateArk Server services are running, as this can lead to an inconsistent state and data loss.
+
+Ensure that in the dbparm.ini the RecoveryPrvKey parameter points to the current Recovery Private Key (recprv.key). If not, you will have to perform a stop / start of the Vault to apply the change.
+
+Active node, only CyberArk Windows Hardened Firewall & PrivateArk Database are up. Shared storage must be online.
+Passive node, all services are off except CyberArk Windows Hardened Firewall.
+
+Open a cmd as admin and place yourself under PrivateArk\Server. Type the following command to perform the Vault rekey :
+
+ChangeServerKeys "<Path to new Recovery keys>" "<Full path to the current VaultEmergency.pass" "<HSM slot where the new Server.key is>"
+
+During the procedure, you will be asked to validate if you are willing to switch to a Server.key on the HSM slot, verify that the current and new server Recovery keys are also present under the defined folders.
+
+Once done, it will start to rekey with the Recovery key (current and old) local to the Vault + the Server.key on the HSM :
+You can consult the ChangeServerKeys.log under the PrivateArk\Server folder to track the progress.
+
+When it is over, you should have :
+02/02/2022 21:55:21 CHSRVK054I ChangeServerKeys process was successful. DBParm.ini must be updated
+to point to new keys for Vault to start.
+02/02/2022 21:55:21 CHSRVK042I ChangeServerKeys process ended.
+
+In the dbparm.ini of DR Cluster Vault node A, change the ServerKey to point to the HSM. Per default, it
+will be ServerKey=HSM#1
+Also, make sure to copy the correct public key(not the demo key) in operator folder location. Otherwise you will see errors. the same has to be done on both nodes.
+
+Copy the Vault keys from DR Cluster Vault node A to B and make also the change in the dbparm.ini for
+the ServerKey parameter.
+
+Files to copy are:
+Backup.key
+Server.pem
+Server.pvk
+VaultUser.pass
+
+Test the DR Cluster Vault switch using the Cluster Vault Manager GUI to switch between node A and
+node B.
