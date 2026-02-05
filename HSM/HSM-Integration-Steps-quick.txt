@@ -4,10 +4,10 @@ vtl verify
 
 lunacm:>
 
-hagroup createGroup -serialNumber 1523405959204 -label CyberArkHAGroup
-haGroup addMember -serialNumber 1522444368826 -group CyberArkHAGroup
-haGroup addMember -serialNumber 1522451353744 -group CyberArkHAGroup
-haGroup addMember -serialNumber 1521049713532 -group CyberArkHAGroup
+hagroup createGroup -serialNumber <member serial> -label CyberArkHAGroup
+haGroup addMember -serialNumber <member serial1> -group CyberArkHAGroup
+haGroup addMember -serialNumber <member serial2> -group CyberArkHAGroup
+haGroup addMember -serialNumber <member serial3> -group CyberArkHAGroup
 haGroup synchronize -group CyberArkHAGroup
 haGroup listGroups
 
