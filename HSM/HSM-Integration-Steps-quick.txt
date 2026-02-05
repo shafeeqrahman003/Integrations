@@ -1,0 +1,27 @@
+Copy the certificates to c:\Program Files\SafeNet\LunaClient\cert\server
+vtl addServer -n <HSM eth0> -c <HSM eth0>.pem
+vtl verify
+
+lunacm:>
+
+hagroup createGroup -serialNumber 1523405959204 -label CyberArkHAGroup
+haGroup addMember -serialNumber 1522444368826 -group CyberArkHAGroup
+haGroup addMember -serialNumber 1522451353744 -group CyberArkHAGroup
+haGroup addMember -serialNumber 1521049713532 -group CyberArkHAGroup
+haGroup synchronize -group CyberArkHAGroup
+haGroup listGroups
+
+vtl verify
+vtl listslots
+
+lunacm:>
+
+haGroup HAOnly -enable
+hagroup haonly -show
+hagroup recoverymode -mode activeEnhanced
+hagroup retry -count 500
+hagroup interval -interval 60
+hagroup halog -maxlength 500000
+hagroup haLog -path "C:\Program Files\SafeNet\LunaClient"
+hagroup haLog -enable
+hagroup haLog -show
